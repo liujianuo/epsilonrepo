@@ -26,6 +26,38 @@ public class ManualControl extends OpMode {
     protected static final double GRIPOPEN = 0; // values for opening and closing servos
     protected static final double GRIPCLOSED = 1;
 
+    public double[] mecanum(x, y, rotation){
+
+        double lf = 0; // Initial variables for power set to each wheel
+        double lb = 0;
+        double rf = 0;
+        double rb = 0;
+
+        // Strafing
+        if (y == 0 || Math.abs(x/y) > 0.7){
+            lf = x;
+            rb = x;
+            lb = -x;
+            rf = -x;
+        }
+        // Driving Foward and Backwards
+        else if (x == 0 || Math.abs(y/x) > 0.7){
+            lf = y;
+            rb = y;
+            lb = y;
+            rf = y;
+        }
+
+        // Compensate for Rotation
+        lf += rotation;
+        lb += rotation;
+        rf -= rotation;
+        rb -= rotation;
+
+        // Finally, assign power values to motors.
+        return [lf, lb, rf, rb]
+    }
+
     public void init(){
         // Map all motors
         rightback = hardwareMap.dcMotor.get("rightback");
@@ -56,41 +88,18 @@ public class ManualControl extends OpMode {
         double rotation = gamepad1.right_stick_x; // Variable for rotation around center
         double manualarm = -gamepad2.left_stick_y; // manual arm mvt
         double duck = gamepad2.right_stick_x/6; // Variable for carousel
-        double lf = 0; // Initial variables for power set to each wheel
-        double lb = 0;
-        double rf = 0;
-        double rb = 0;
+        
 
         //---------------------------------//
         //     Drive Train Calculations    //
         //---------------------------------//
 
-        // Strafing
-        if (y == 0 || Math.abs(x/y) > 0.7){
-            lf = x;
-            rb = x;
-            lb = -x;
-            rf = -x;
-        }
-        // Driving Foward and Backwards
-        else if (x == 0 || Math.abs(y/x) > 0.7){
-            lf = y;
-            rb = y;
-            lb = y;
-            rf = y;
-        }
+        double[] motorval = mecanum(x, y, rotation)
 
-        // Compensate for Rotation
-        lf += rotation;
-        lb += rotation;
-        rf -= rotation;
-        rb -= rotation;
-
-        // Finally, assign power values to motors.
-        leftfront.setPower(lf);
-        leftback.setPower(lb);
-        rightfront.setPower(rf);
-        rightback.setPower(rb);
+        leftfront.setPower(motorval[1]);
+        leftback.setPower(lmotorval[2]);
+        rightfront.setPower(motorval[3]);
+        rightback.setPower(motorval[4]);
 
         //---------------------------------//
         //             Arm Pivot           //
